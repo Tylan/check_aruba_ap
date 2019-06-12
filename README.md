@@ -33,6 +33,9 @@ Nagios plugins installed and located in /usr/lib64/nagios/plugins
 Download and install Net-SNMP.  If you choose to build from source use the following line:
 ```
 ./configure --with-perl-modules --with-mibdirs --enable-shared
+make
+make test
+make install
 ```
 
 Copy check_aruba_ap into your plugin directory and give it executable writes:
