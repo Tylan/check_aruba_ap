@@ -30,7 +30,7 @@ Nagios plugins installed and located in /usr/lib64/nagios/plugins
 
 ### Installing
 
-Download and install Net-SNMP.  If you choose to build from source use the following line:
+Download and install Net-SNMP.  If you choose to build from source use the following lines:
 ```
 ./configure --with-perl-modules --with-mibdirs --enable-shared
 make
