@@ -29,7 +29,7 @@ Checks Aruba AP Information by connecting to Aruba Controller. Verbose option av
 
 ### **AP Noise Level**
 
-![](img/APNoiseLevelGraph.png)
+![](img/APNoiseLevelGraphSimple.png)
 
 ## Getting Started
 
