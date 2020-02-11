@@ -3,19 +3,23 @@ Checks Aruba AP Information by connecting to Aruba Controller
 
 **AP Up/Down Status**
 
-[TO BE ADDED]
+![](img/APStatusGraph.png)
 
 **AP RX/TX/Radio Utilization**
 
-[TO BE ADDED]
+![](img/APUtilizationGraph.png)
 
 **AP Traffic Utilization**
 
-[TO BE ADDED]
+![](img/APBandwidthGraph.png)
 
 **AP User Count**
 
-[TO BE ADDED]
+![](img/APUserCountGraph.png)
+
+**AP Noise Level**
+
+![](img/APNoiseLevelGraph.png)
 
 ## Getting Started
 
