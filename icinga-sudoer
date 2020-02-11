@@ -1,0 +1,3 @@
+Cmnd_Alias ICINGA2 = /usr/lib64/nagios/plugins/check_aruba_ap
+
+icinga ALL = NOPASSWD: ICINGA2
