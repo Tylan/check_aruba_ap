@@ -73,7 +73,22 @@ sudo restorecon -R -v /usr/share/snmp/mibs
 If using Graphite, copy graphite templates to Icinga2 Graphite template folder:
 
 ```
-[TO BE ADDED]
+sudo cp ./aruba-usercount.ini /usr/share/icingaweb2/modules/graphite/templates/
+sudo cp ./aruba-status.ini /usr/share/icingaweb2/modules/graphite/templates/
+sudo cp ./aruba-bandwidth.ini /usr/share/icingaweb2/modules/graphite/templates/
+sudo cp ./aruba-utilization.ini /usr/share/icingaweb2/modules/graphite/templates/
+sudo cp ./aruba-noise.ini /usr/share/icingaweb2/modules/graphite/templates/
+```
+
+
+If using Grafana, import JSON Dashboard (Graphite or InfluxDB) file and add graph dashboard information into module making sure to name the Dashboard aruba-controller:
+
+![](img/GrafanaDashboardImport.png)
+
+![](img/GrafanaLoadJSON.png)
+
+```
+sudo cat aruba-controller-graphs.ini >> /etc/icingaweb2/modules/grafana/graphs.ini
 ```
 
 Restart Icinga2:
