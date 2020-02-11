@@ -1,7 +1,7 @@
 # check_aruba_ap
 Checks Aruba AP Information by connecting to Aruba Controller.
 
-Verbose option available on all metrics for more detailed output - see AP User Count images for example.
+Verbose option available on all metrics for more detailed output - see AP User Count images for an example.
 
 ### **AP Up/Down Status**
 
