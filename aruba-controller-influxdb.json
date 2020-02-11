@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1581436083658,
+  "iteration": 1581445668691,
   "links": [],
   "panels": [
     {
@@ -361,6 +361,7 @@
         "colorScale": "sqrt",
         "colorScheme": "interpolateSpectral",
         "exponent": 0.5,
+        "min": null,
         "mode": "spectrum"
       },
       "dataFormat": "timeseries",
@@ -429,7 +430,7 @@
       "xBucketSize": null,
       "yAxis": {
         "decimals": null,
-        "format": "short",
+        "format": "dB",
         "logBase": 1,
         "max": null,
         "min": null,
@@ -518,7 +519,7 @@
       "xBucketSize": null,
       "yAxis": {
         "decimals": null,
-        "format": "short",
+        "format": "KBs",
         "logBase": 1,
         "max": null,
         "min": null,
@@ -604,7 +605,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -624,5 +625,5 @@
   "timezone": "",
   "title": "aruba-controller",
   "uid": "TlwtZj8Zk",
-  "version": 30
+  "version": 32
 }
