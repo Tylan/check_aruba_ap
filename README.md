@@ -71,6 +71,25 @@ Append services-aruba-ap.conf to the end of your Icinga2 services.conf:
 cat ./services-aruba-ap.conf >> /etc/icinga2/conf.d/services.conf
 ```
 
+This script writes to the /tmp folder and needs to be added to sudoers for the username icinga.
+
+If your installation is running on a different username, change it before copying the file:
+
+```
+icinga ALL = NOPASSWD: ICINGA2
+
+to:
+
+<YOUR USERNAME> ALL = NOPASSWD: ICINGA2
+```
+
+Copy sudoer file to proper place:
+
+```
+sudo cp ./icinga-sudoer /etc/sudoers.d/icinga
+sudo chmod 0440 /etc/sudoers.d/icinga
+```
+
 Extract Aruba MIB files:
 
 ```
