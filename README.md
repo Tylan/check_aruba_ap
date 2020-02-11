@@ -74,7 +74,7 @@ cat ./services-aruba-ap.conf >> /etc/icinga2/conf.d/services.conf
 Extract Aruba MIB files:
 
 ```
-sudo  tar -xzvf aruba-mibs.tgz /usr/share/snmp/mibs/
+sudo  tar -xzvf ./aruba-mibs.tgz /usr/share/snmp/mibs/
 ```
 
 Set proper MIB folder permissions:
