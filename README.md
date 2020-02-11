@@ -1,23 +1,33 @@
 # check_aruba_ap
-Checks Aruba AP Information by connecting to Aruba Controller
+Checks Aruba AP Information by connecting to Aruba Controller. Verbose option available on all metrics for more detailed output.  See AP User Count images for example.
 
-**AP Up/Down Status**
+### **AP Up/Down Status**
 
-![](img/APStatusGraph.png)
+![](img/APStatusGraphSimple.png)
 
-**AP RX/TX/Radio Utilization**
+### **AP RX/TX/Radio Utilization**
 
-![](img/APUtilizationGraph.png)
+![](img/APUtilizationGraphSimple.png)
 
-**AP Traffic Utilization**
+### **AP Traffic Utilization**
 
-![](img/APBandwidthGraph.png)
+![](img/APBandwidthGraphSimple.png)
 
-**AP User Count**
+### **AP User Count**
 
-![](img/APUserCountGraph.png)
+###### Simple (No Alerts)
 
-**AP Noise Level**
+![](img/APUserCountGraphSimple.png)
+
+###### Simple (With Alerts)
+
+![](img/APUserCountGraphWarning.png)
+
+###### Verbose
+
+![](img/APUserCountGraphVerbose.png)
+
+### **AP Noise Level**
 
 ![](img/APNoiseLevelGraph.png)
 
@@ -30,7 +40,6 @@ These instructions assume your Icinga2 is installed on a RHEL/CentOS system.  Yo
 Net-SNMP (http://www.net-snmp.org/)
 
 Nagios plugins installed and located in /usr/lib64/nagios/plugins
-
 
 ### Installing
 
