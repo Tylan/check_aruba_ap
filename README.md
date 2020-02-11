@@ -83,17 +83,6 @@ sudo restorecon -R -v /usr/lib64/nagios/plugins/
 sudo restorecon -R -v /usr/share/snmp/mibs
 ```
 
-If using Graphite, copy graphite templates to Icinga2 Graphite template folder:
-
-```
-sudo cp ./aruba-usercount.ini /usr/share/icingaweb2/modules/graphite/templates/
-sudo cp ./aruba-status.ini /usr/share/icingaweb2/modules/graphite/templates/
-sudo cp ./aruba-bandwidth.ini /usr/share/icingaweb2/modules/graphite/templates/
-sudo cp ./aruba-utilization.ini /usr/share/icingaweb2/modules/graphite/templates/
-sudo cp ./aruba-noise.ini /usr/share/icingaweb2/modules/graphite/templates/
-```
-
-
 If using Grafana, import JSON Dashboard (Graphite or InfluxDB) file and add graph dashboard information into module making sure to name the Dashboard aruba-controller:
 
 ![](img/GrafanaDashboardImport.png)
