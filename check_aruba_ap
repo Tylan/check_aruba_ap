@@ -194,8 +194,10 @@ Optional Arguments:
     Sets noise warning limit for alerting. Default: 80
  --ncrit
     Sets noise critical limit for alerting. Default: 75
- --userlimit
-    Sets user count threshold limit for alerting. Default: 20
+ --userwarn
+    Sets user count warning limit for alerting. Default: 40
+ --usercrit
+    Sets user count critical limit for alerting. Default: 60
  --bwlimit
     Sets AP SSID Band Traffic Threshold warning limit (in MB). Default: 100
  --verbose
