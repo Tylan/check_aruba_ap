@@ -1,5 +1,5 @@
 # check_aruba_ap
-Checks Aruba AP Information by connecting to Aruba Controller.
+Checks Aruba AP Information by connecting to Aruba Controller utilizing SNMP queries.
 
 Verbose option available on all metrics for more detailed output - see AP User Count images for an example.
 
