@@ -3,14 +3,12 @@
 #                                                       #
 #                                                       #
 #          Aruba AP Check Plugin for Icinga             #
-#            Version 1.0.0 (February 11, 2020)          #
+#            Version 1.0.0 (February 12, 2020)          #
 #                by Rob McLoughlin                      #
 #         E-mail: rmcloughlin@outlook.com               #
 #                                                       #
 # Version History                                       #
-#                                                       #
-# 1.0.0                                                 #
-#    - Initial release                                  #
+#    - Refer to CHANGELOG.md                            #
 #                                                       #
 #    This plugin is distributed under the GNU GPL       #
 # license. You may re-destribute only according to      #
@@ -37,19 +35,18 @@ use Data::Dumper;
 use vars qw(
   $PROGNAME $VERSION %procs $snmp $errstr $oid
   $opt_version $opt_help $opt_timeout $opt_host $opt_community
-  $opt_snmpver $opt_warning $opt_critical $opt_status $opt_model
-  $opt_bwlimit $opt_verbose $opt_traffic $opt_users $opt_userlimit
-  $opt_noise $opt_nwarn $opt_ncrit $opt_utilization $opt_uwarn
-  $opt_ucrit
+  $opt_snmpver $opt_status $opt_model $opt_bwlimit $opt_verbose
+  $opt_traffic $opt_users $opt_userwarn $opt_usercrit $opt_noise
+  $opt_nwarn $opt_ncrit $opt_utilization $opt_uwarn $opt_ucrit
 );
 my (@DataOIDs,@v1,@v2,@v3,@v4,@v5,@v6,@v7,@v8,@v9);
 my (@APs,@APdot11a,@APdot11g,@APNLa,@APNLg,@status,@APClients,@APBandwidth,
         @APUa,@APUg,@APNoise,@APUtilization,@TrResults,@message,@mresults);
 my ($i,$state,$statuscode,$max_value,$dot11a_in_usage_display,
         $dot11a_out_usage_display,$dot11g_in_usage_display,$dot11g_out_usage_display);
-my ($r,$in_value,$out_value,$tcount,$acount,$gcount,$ncount,$warncount,$critcount,
-        $warn24ghz,$crit24ghz,$warn5ghz,$crit5ghz,$warn24ghzrx,$crit24ghzrx,$warn24ghztx,
-        $crit24ghztx,$warn5ghzrx,$crit5ghzrx,$warn5ghztx,$crit5ghztx) = 0;
+my ($r,$in_value,$out_value,$tcount,$acount,$gcount,$ncount,$alertcount,$warncount,
+        $critcount,$warn24ghz,$crit24ghz,$warn5ghz,$crit5ghz,$warn24ghzrx,$crit24ghzrx,
+        $warn24ghztx,$crit24ghztx,$warn5ghzrx,$crit5ghzrx,$warn5ghztx,$crit5ghztx) = 0;
 my ($L_APName,$L_APa,$L_APg,$EXITSTRING) = "";
 my $PERFSTRING = "|";
 # Path to tmp files
@@ -69,10 +66,9 @@ $opt_timeout            = $TIMEOUT;
 $opt_host               = undef;
 $opt_community          = 'public';
 $opt_snmpver            = 1;
-$opt_warning            = 20; # warning percentage: if lower: warning
-$opt_critical           = 5;  # critical percentage: if lower: critical
 $opt_bwlimit            = 100;
-$opt_userlimit          = 20;
+$opt_userwarn           = 40;
+$opt_usercrit           = 60;
 $opt_nwarn              = 80;
 $opt_ncrit              = 75;
 $opt_uwarn              = 70;
@@ -92,12 +88,9 @@ GetOptions(
   'H|host=s'            => \$opt_host,
   'C|community=s'       => \$opt_community,
   'v|snmpver=s'         => \$opt_snmpver,
-  'w|warning=i'         => \$opt_warning,
-  'c|critical=i'        => \$opt_critical,
   'status'              => \$opt_status,
   'verbose'             => \$opt_verbose,
   'bwlimit=i'           => \$opt_bwlimit,
-  'userlimit=i'         => \$opt_userlimit,
   'traffic'             => \$opt_traffic,
   'users'               => \$opt_users,
   'noise'               => \$opt_noise,
@@ -105,7 +98,9 @@ GetOptions(
   'ncrit=i'             => \$opt_ncrit,
   'utilization'         => \$opt_utilization,
   'uwarn=i'             => \$opt_uwarn,
-  'ucrit=i'             => \$opt_ucrit
+  'ucrit=i'             => \$opt_ucrit,
+  'userwarn=i'          => \$opt_userwarn,
+  'usercrit=i'          => \$opt_usercrit
 ) or do {
   print_usage();
   exit($ERRORS{'UNKNOWN'});
@@ -173,41 +168,38 @@ EOB
 Required Arguments:
  -H, --host=HOST
     The name or address of the host running SNMP.
+Required (one) Arguments:
  --status
     Determine AP status (up/down)
  --traffic
     Checks AP SSIDs for bandwidth usage
- --bwlimit
-    Sets AP SSID Band Traffic Threshold warning limit (in MB). Default: 100
  --users
     Checks user count on each band's SSID.
  --noise
     Checks AP noise level
- --userlimit
-    Sets user count threshold limit for alerting. Default: 20
- --nwarn
-    Sets noise warning limit for alerting. Default: 80
- --ncrit
-    Sets noise critical limit for alerting. Default: 75
  --utilization
     Displays AP channel utilization
- --uwarn
-    Sets channel utilization warning limit for alerting. Default: 70
- --ucrit
-    Sets channel utilitization critical limit for alerting. Default: 90
- --verbose
-    Displays OK state events
 Optional Arguments:
  -C, --community=STRING
     The community string of the SNMP agent. Default: public
  -v, --snmpver=STRING
     The version of snmp to use.  1 and 2 are supported. Default: 1
- -w, --warning=INTEGER
-    The warning limit level to alert on.
- -c, --critical=INTEGER
-    The critical limit level to alert on.
  -t, --timeout=INTEGER
     Number of seconds to wait for a response.
+ --uwarn
+    Sets channel utilization warning limit for alerting. Default: 70
+ --ucrit
+    Sets channel utilitization critical limit for alerting. Default: 90
+ --nwarn
+    Sets noise warning limit for alerting. Default: 80
+ --ncrit
+    Sets noise critical limit for alerting. Default: 75
+ --userlimit
+    Sets user count threshold limit for alerting. Default: 20
+ --bwlimit
+    Sets AP SSID Band Traffic Threshold warning limit (in MB). Default: 100
+ --verbose
+    Displays OK state events
 EOB
 }
 
@@ -286,10 +278,12 @@ sub check_status {
                         $outages++;
                         $state = "CRITICAL";
                         $statuscheck = " is offline.";
+                        $PERFSTRING.="$APs[$i][0]=0;;;; ";
                 }
-                if ($opt_verbose && ($APs[$i][5] != 2)) {
+                if ($APs[$i][5] != 2) {
                         $state = "OK";
                         $statuscheck = "";
+                        $PERFSTRING.="$APs[$i][0]=1;;;; ";
                 }
                 $i++;
         push (@status, $state);
@@ -300,7 +294,7 @@ sub check_status {
                 $EXITSTRING = "OK: All APs are online.\n";
                 push (@status, $state);
         } else { prioritize_results('status'); }
-
+        $EXITSTRING.= $PERFSTRING;
 }
 
 sub check_traffic {
@@ -424,16 +418,25 @@ sub check_traffic {
         }
         while ($c < (scalar @APBandwidth)) {
                 (my $APPerfName = $APBandwidth[$c][0]) =~ s/ /_/g;
-                if (($APBandwidth[$c][1] || $APBandwidth[$c][2] || $APBandwidth[$c][3] || $APBandwidth[$c][4]) > $bwlimit) { $state = "WARNING"; } else { $state = "OK"; }
+                if (($APBandwidth[$c][1] || $APBandwidth[$c][2] || $APBandwidth[$c][3] || $APBandwidth[$c][4]) > $bwlimit) {
+                        $state = "WARNING";
+                        $warncount++;
+                } else { $state = "OK"; }
                 if ($state eq "WARNING" || $opt_verbose) {
                         $bandwidth = " -- (5Ghz) RX: $APBandwidth[$c][1]Kb/s TX: $APBandwidth[$c][2]Kb/s - (2.4Ghz) RX: $APBandwidth[$c][3]Kb/s TX: $APBandwidth[$c][4]Kb/s";
-                        push (@message, $bandwidth);
-                        $PERFSTRING.= $APPerfName."_5Ghz_RX=".$APBandwidth[$c][1].";;;; ".$APPerfName."_5Ghz_TX=".$APBandwidth[$c][2].";;;; ".$APPerfName."_2_4Ghz_RX=".$APBandwidth[$c][3].";;;; ".$APPerfName."_2_4Ghz_TX=".$APBandwidth[$c][4].";;;; ";
                 }
-        push (@status, $state);
-        $c++;
+                $PERFSTRING.= $APPerfName."_5Ghz_RX=".$APBandwidth[$c][1].";;;; ".$APPerfName."_5Ghz_TX=".$APBandwidth[$c][2].";;;; ".$APPerfName."_2_4Ghz_RX=".$APBandwidth[$c][3].";;;; ".$APPerfName."_2_4Ghz_TX=".$APBandwidth[$c][4].";;;; ";
+                push (@status, $state);
+                push (@message, $bandwidth);
+                $c++;
         }
-        prioritize_results('traffic');
+        if ($warncount == 0 && $critcount == 0 && !$opt_verbose) {
+                $state = "OK";
+                $EXITSTRING.= "OK: All APs within bandwidth thresholds.\n";
+                push (@status, $state);
+        } else { prioritize_results('traffic'); }
+        $EXITSTRING.= $PERFSTRING;
+        $warncount = 0;
 }
 
 sub check_noise {
@@ -462,44 +465,44 @@ sub check_noise {
                         $warn5ghz++;
                         $state = "WARNING";
                         $noise =  "Noise level on $APNoise[$n][0] (5Ghz) exceeds threshold: -$APNoise[$n][1]";
-                        $PERFSTRING.= $APPerfName."_5Ghz=".$APNoise[$n][1].";;;; ";
+                        $PERFSTRING.= $APPerfName."_5Ghz=-".$APNoise[$n][1].";;;; ";
                 }
                 if ($APNoise[$n][1] < $opt_ncrit) {
                         $critcount++;
                         $crit5ghz++;
                         $state = "CRITICAL";
                         $noise = "Noise level on $APNoise[$n][0] (5Ghz) exceeds threshold: -$APNoise[$n][1]";
-                        $PERFSTRING.= $APPerfName."_5Ghz=".$APNoise[$n][1].";;;; ";
+                        $PERFSTRING.= $APPerfName."_5Ghz=-".$APNoise[$n][1].";;;; ";
                 }
                 if (($APNoise[$n][2] < $opt_nwarn) && ($APNoise[$n][2] >= $opt_ncrit)) {
                         $warncount++;
                         $warn24ghz++;
                         $state = "WARNING";
                         $noise = "Noise level on $APNoise[$n][0] (2.4Ghz) exceeds threshold: -$APNoise[$n][2]";
-                        $PERFSTRING.= $APPerfName."_2_4Ghz=".$APNoise[$n][2].";;;; ";
+                        $PERFSTRING.= $APPerfName."_2_4Ghz=-".$APNoise[$n][2].";;;; ";
                 }
                 if ($APNoise[$n][2] < $opt_ncrit) {
                         $critcount++;
                         $crit24ghz++;
                         $state = "CRITICAL";
                         $noise = "Noise level on $APNoise[$n][0] (2.4Ghz) exceeds threshold: -$APNoise[$n][2]";
-                        $PERFSTRING.= $APPerfName."_2_4Ghz=".$APNoise[$n][2].";;;; ";
+                        $PERFSTRING.= $APPerfName."_2_4Ghz=-".$APNoise[$n][2].";;;; ";
                 }
-                elsif ($opt_verbose) {
+                if (!$state) {
                         $noise = "Noise levels on $APNoise[$n][0] are within normal thresholds -";
                         $state = "OK";
-                        if (!$warn24ghz || !$crit24ghz) { $noise.= " [2.4Ghz]: -$APNoise[$n][2]"; $PERFSTRING.= $APPerfName."_2_4Ghz=".$APNoise[$n][2].";;;; ";}
-                        if (!$warn5ghz || !$crit5ghz) { $noise.= " [5Ghz]: -$APNoise[$n][1]"; $PERFSTRING.= $APPerfName."_5Ghz=".$APNoise[$n][1].";;;; ";}
+                        if (!$warn24ghz || !$crit24ghz) { $noise.= " [2.4Ghz]: -$APNoise[$n][2]"; $PERFSTRING.= $APPerfName."_2_4Ghz=-".$APNoise[$n][2].";;;; ";}
+                        if (!$warn5ghz || !$crit5ghz) { $noise.= " [5Ghz]: -$APNoise[$n][1]"; $PERFSTRING.= $APPerfName."_5Ghz=-".$APNoise[$n][1].";;;; ";}
                 }
         ($warn24ghz,$crit24ghz,$warn5ghz,$crit5ghz) = 0;
         $n++;
         push (@status, $state);
         push (@message, $noise);
+        $state = undef;
         }
         if ($warncount == 0 && $critcount == 0 && !$opt_verbose) {
                 $state = "OK";
-                $EXITSTRING.= "OK: All noise levels within threshold limts.\n";
-                $PERFSTRING = "";
+                $EXITSTRING.= "OK: All noise levels within threshold limits.\n";
                 push (@status, $state);
         } else { prioritize_results('noise'); }
         $EXITSTRING.= $PERFSTRING;
@@ -607,7 +610,7 @@ sub check_utilization {
                         $utilization = "Radio Utilization on $APUtilization[$u][0] (2.4Ghz) exceeds threshold: $APUtilization[$u][6]";
                         $PERFSTRING.= $APPerfName."_2_4Ghz=".$APUtilization[$u][6].";;;; ";
                 }
-                elsif ($opt_verbose) {
+                if (!$state) {
                         $state = "OK";
                         $utilization = "Utilizations on $APUtilization[$u][0] are within normal thresholds.";
                         if (!$warn24ghz || !$crit24ghz || !$warn24ghzrx || !$crit24ghzrx || !$warn24ghztx || !$crit24ghztx) {
@@ -629,11 +632,11 @@ sub check_utilization {
         $u++;
         push (@status, $state);
         push (@message, $utilization);
+        $state = undef;
         }
         if ($warncount == 0 && $critcount == 0 && !$opt_verbose) {
                 $state = "OK";
-                $EXITSTRING.= "OK: All AP Channel Utilizations are within threshold limts.\n";
-                $PERFSTRING = "";
+                $EXITSTRING.= "OK: All AP Channel Utilizations are within threshold limits.\n";
                 push (@status, $state);
         } else { prioritize_results('utilization'); }
         $EXITSTRING.= $PERFSTRING;
@@ -751,12 +754,6 @@ sub get_data {
         }
 }
 
-sub sort_users {
-        my ($dunno) = @_;
-
-
-}
-
 sub check_users {
         my ($c,$t,$acc,$gcc,$ccount,$APCount,$tpush) = 0;
         my ($ausers,$gusers,$L_APName, $clients);
@@ -790,47 +787,68 @@ sub check_users {
 
         @APClients = sort { $a->[0] cmp $b->[0] || ($b->[1] cmp $a->[1]) } @APClients;
 
+
         while ($c < (scalar @APClients)) {
                 (my $APPerfName = $APClients[$c][0]) =~ s/ /_/g;
-                if (($APClients[$c][1] >= $opt_userlimit) and ($APClients[$c][1] ne 'NA')) {
+                if ((($APClients[$c][1] >= $opt_userwarn) and ($APClients[$c][1] < $opt_usercrit)) and ($APClients[$c][1] ne 'NA')) {
                         $warncount++;
+                        $alertcount++;
                         $state = "WARNING";
                         $clients = "User count on $APClients[$c][0] (5Ghz) exceeds threshold: $APClients[$c][1]";
                         push (@status, $state);
                         push (@message, $clients);
                         $PERFSTRING.= $APPerfName."_5Ghz=".$APClients[$c][1].";;;; ";
                 }
-                if (($APClients[$c][2] >= $opt_userlimit) and ($APClients[$c][2] ne 'NA')) {
+                if (($APClients[$c][1] >= $opt_usercrit) and ($APClients[$c][1] ne 'NA')) {
                         $warncount++;
+                        $alertcount++;
+                        $state = "CRITICAL";
+                        $clients = "User count on $APClients[$c][0] (5Ghz) exceeds threshold: $APClients[$c][1]";
+                        push (@status, $state);
+                        push (@message, $clients);
+                        $PERFSTRING.= $APPerfName."_5Ghz=".$APClients[$c][1].";;;; ";
+                }
+                if ((($APClients[$c][2] >= $opt_userwarn) and ($APClients[$c][2] < $opt_usercrit)) and ($APClients[$c][2] ne 'NA')) {
+                        $warncount++;
+                        $alertcount++;
                         $state = "WARNING";
                         $clients = "User count on $APClients[$c][0] (2.4Ghz) exceeds threshold: $APClients[$c][2]";
                         push (@status, $state);
                         push (@message, $clients);
                         $PERFSTRING.= $APPerfName."_2_4Ghz=".$APClients[$c][2].";;;; ";
                 }
-                if (($opt_verbose && $APClients[$c][1] < $opt_userlimit) and ($APClients[$c][1] ne 'NA')) {
+                if (($APClients[$c][2] >= $opt_usercrit) and ($APClients[$c][2] ne 'NA')) {
+                        $warncount++;
+                        $alertcount++;
+                        $state = "CRITICAL";
+                        $clients = "User count on $APClients[$c][0] (2.4Ghz) exceeds threshold: $APClients[$c][2]";
+                        push (@status, $state);
+                        push (@message, $clients);
+                        $PERFSTRING.= $APPerfName."_2_4Ghz=".$APClients[$c][2].";;;; ";
+                }
+                if ((!$warncount) and ($APClients[$c][1] ne 'NA')) {
                         $state = "OK";
                         $clients = "User count on $APClients[$c][0] (5Ghz): $APClients[$c][1]";
                         push (@status, $state);
                         push (@message, $clients);
                         $PERFSTRING.= $APPerfName."_5Ghz=".$APClients[$c][1].";;;; ";
                 }
-                if (($opt_verbose && $APClients[$c][2] < $opt_userlimit) and ($APClients[$c][2] ne 'NA')) {
+                if ((!$warncount) and ($APClients[$c][2] ne 'NA')) {
                         $state = "OK";
                         $clients = "User count on $APClients[$c][0] (2.4Ghz): $APClients[$c][2]";
                         push (@status, $state);
                         push (@message, $clients);
                         $PERFSTRING.= $APPerfName."_2_4Ghz=".$APClients[$c][2].";;;; ";
                 }
+        $warncount = 0;
         $c++;
         }
-        if ($warncount == 0 && !$opt_verbose) {
+        if ($alertcount == 0 && !$opt_verbose) {
                 $state = "OK";
-                $EXITSTRING.= "OK: All user counts within threshold limts.\n";
-                $PERFSTRING = "";
+                $EXITSTRING.= "OK: All user counts within threshold limits.\n";
         }  else { prioritize_results('clients'); }
         $EXITSTRING.= $PERFSTRING;
-        $warncount = 0;
+        $alertcount = 0;
 }
 
 sub prioritize_results {
@@ -847,8 +865,14 @@ sub prioritize_results {
         while ($mcount > 0) {
                 if ($status[$i] eq 'CRITICAL') { $scode = 1; }
                 if ($status[$i] eq 'WARNING') { $scode = 2; }
-                if ($status[$i] eq 'OK') { $scode = 3; }
-
+                if (($status[$i] eq 'OK') and ($opt_verbose)) {
+                        $scode = 3;
+                }
+                if (($status[$i] eq 'OK') and (!$opt_verbose)) {
+                        $mcount--;
+                        $i++;
+                        next;
+                }
                 if ($metric eq "traffic") {
                         push @{ $mresults[$i] }, $scode, $status[$i], $APBandwidth[$i][0], $message[$i];
                 }
@@ -912,11 +936,11 @@ if ($critcount > 0) { $state = "CRITICAL"; }
 elsif ($warncount > 0) { $state = "WARNING"; }
 else {
         $state = "OK";
-        if ($opt_traffic && !$opt_verbose) {
-                $EXITSTRING = "OK: All APs within bandwidth thresholds.\n";
-        }
+#       if ($opt_traffic && !$opt_verbose) {
+#               $EXITSTRING = "OK: All APs within bandwidth thresholds.\n";
+#       }
 }
-if ($opt_traffic) { $EXITSTRING.= $PERFSTRING; }
+#if ($opt_traffic) { $EXITSTRING.= $PERFSTRING; }
 
 stop($EXITSTRING, $state);
 
