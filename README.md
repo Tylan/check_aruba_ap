@@ -83,7 +83,7 @@ to:
 <YOUR USERNAME> ALL = NOPASSWD: ICINGA2
 ```
 
-Copy sudoer file to proper place:
+Copy sudoer file to proper place and give minimal permissions:
 
 ```
 sudo cp ./icinga-sudoer /etc/sudoers.d/icinga
